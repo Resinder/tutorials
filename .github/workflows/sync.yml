@@ -1,0 +1,28 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Her saat başı kontrol et (dilediğiniz sıklığa ayarlayabilirsiniz)
+  workflow_dispatch:     # Manuel tetikleme seçeneği ekler
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync Fork
+        uses: actions/github-script@v6
+        with:  # Varsayılan branch, değiştirebilirsiniz
+          script: |
+            try {
+              await github.request('POST /repos/{owner}/{repo}/merge-upstream', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'main'
+              })
+              console.log('Sync successful!')
+            } catch (error) {
+              console.error('Sync failed:', error)
+            }
